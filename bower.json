@@ -1,0 +1,16 @@
+{
+  "name": "compression_test",
+  "version": "0.0.0",
+  "authors": [
+    "GeorgiyPankov <georgiy.pankov@brightergy.com>"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "public",
+    "test",
+    "tests"
+  ]
+}

@@ -1,0 +1,66 @@
+doctype html
+html(lang="en")
+  head
+    title="Hello"
+    script(src="https://code.jquery.com/jquery-2.1.3.min.js")
+    script(src="/gunzip.min.js")
+    script(src="/pako/dist/pako.min.js")
+    script(type="text/javascript").
+
+        function processFile(prefix, file, decompressor) {
+
+            if (!file) {
+                file = "/file1.json"
+            }
+
+            console.time(prefix + ".receive");
+
+            var req = new XMLHttpRequest();
+            req.open("GET", file);
+            req.responseType = "arraybuffer";
+
+            req.onload = function (event) {
+                var buffer = req.response; // Note: not oReq.responseText
+                console.log("Successfully get: " + buffer.byteLength + " bytes of data");
+                console.timeEnd(prefix + ".receive");
+
+                if (!buffer) {
+                    console.err("arrayBuffer empty");
+                    return;
+                }
+
+                console.time(prefix + ".unpack");
+                var binData = new Uint8Array(buffer);
+                decompressor(binData);
+                console.timeEnd(prefix + ".unpack");
+            }
+            req.send(null);
+        };
+
+
+        function zlibTest(file) {
+            processFile("zlib_file1", file, function(binData) {
+                var gunzip = new Zlib.Gunzip(binData);
+
+                var plain = gunzip.decompress();
+
+                // Convert gunzipped byteArray back to ascii string:
+                var strData = String.fromCharCode.apply(null, plain);
+                console.log("Unpack size: " + strData.length);
+            })
+        };
+
+        function pakoTest(file) {
+            processFile("pako_file1", file, function(binData) {
+                // Convert gunzipped byteArray back to ascii string:
+                var strData = pako.inflate(binData);
+                console.log("Unpack size: " + strData.length);
+            });
+        }
+
+
+  body
+      button(onclick="zlibTest('/file1.json')") zlib
+      button(onclick="zlibTest('/file2.json')") zlib2
+      button(onclick="pakoTest('/file1.json')") pako
+      button(onclick="pakoTest('/file2.json')") pako2
